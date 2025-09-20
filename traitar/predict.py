@@ -12,6 +12,8 @@ import multiprocessing as mp
 from functools import partial
 ## 3rd party
 import pandas as ps
+import numpy as np
+
 ## application
 from traitar.PhenotypeCollection import PhenotypeCollection
 
@@ -22,17 +24,17 @@ def filter_pred(scores, is_majority, k):
         if (scores > 0).sum() >= (k/2 + 1):
             return scores[scores >= 0].mean()
         else:
-            return ps.np.NaN
+            return np.nan
     else:
         if (scores > 0).all():
             return scores.mean()
         else:
-            return ps.np.NaN
+            return np.nan
 
 def aggregate(pred_df, k, out_dir, pt2acc):
     """employ different prediction strategies"""
     out = ["majority-vote", "conservative-vote", "single-votes"]
-    maj_pred_dfs = ps.DataFrame(ps.np.zeros(shape = (pred_df.shape[0], pred_df.shape[1] // k)),
+    maj_pred_dfs = ps.DataFrame(np.zeros(shape = (pred_df.shape[0], pred_df.shape[1] // k)),
                                 columns = [str(i) for i in range(pred_df.shape[1]//k)])
     maj_pred_dfs.index = pred_df.index
     maj_pred_dfs_columns = maj_pred_dfs.columns.tolist()
@@ -73,7 +75,7 @@ def majority_predict(x, test_data, k, bias_weight = 1):
     #binarize
     test_data_n = (test_data > 0).astype('int')
     #build prediction matrix with the k best models
-    preds = ps.np.zeros((test_data.shape[0], k))
+    preds = np.zeros((test_data.shape[0], k))
     for i in range(k):
         preds[:, i] = bias.iloc[i, 0] * bias_weight + \
                       predictors.iloc[:, i].dot(test_data_n.loc[:, predictors.iloc[:, i].index].T)

@@ -8,6 +8,7 @@ import argparse
 from collections import defaultdict
 ## 3rd party
 import pandas as ps
+import numpy as np
 
 # functions
 def flatten_df(df1, df2, name1, name2, out):
@@ -40,8 +41,8 @@ def comb_preds(pred_files, primary_name, secondary_name, out_dir, k):
     #collect phenotypes that are shared / different in the two data sets
     #combine predictions of phypat and phypat+PGL into one matrix 
     m_columns = set(m1.columns).union(set(m2.columns))
-    m = ps.DataFrame(ps.np.zeros((m1.shape[0], len(m_columns))))
-    m_maj = ps.DataFrame(ps.np.zeros((m1.shape[0], len(m_columns))))
+    m = ps.DataFrame(np.zeros((m1.shape[0], len(m_columns))))
+    m_maj = ps.DataFrame(np.zeros((m1.shape[0], len(m_columns))))
     m_maj.columns = m.columns = m_columns
     m_maj.index = m1.index
     m.index = m1.index
@@ -49,14 +50,14 @@ def comb_preds(pred_files, primary_name, secondary_name, out_dir, k):
     m.loc[:, m1.columns] = m1
     m.loc[:, m2.columns] = m.loc[:, m2.columns] + m2
     #combine majority votes
-    m_maj.loc[:, set(m1.columns).difference(set(m2.columns))] = m1_maj.loc[:, set(m1.columns).difference(set(m2.columns))] * 2
-    m_maj.loc[:, set(m2.columns).difference(set(m1.columns))] = m2_maj.loc[:, set(m2.columns).difference(set(m1.columns))] 
-    m_temp = m_maj.loc[:, set(m2.columns).intersection(set(m1.columns))]
+    m_maj.loc[:, list(set(m1.columns).difference(set(m2.columns)))] = m1_maj.loc[:, list(set(m1.columns).difference(set(m2.columns)))] * 2
+    m_maj.loc[:, list(set(m2.columns).difference(set(m1.columns)))] = m2_maj.loc[:, list(set(m2.columns).difference(set(m1.columns)))] 
+    m_temp = m_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))]
     if not set(m2.columns).intersection(set(m1.columns)) == set():
-        m_temp[(m1_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 1) & (m2_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 1)] = 3
-        m_temp[(m1_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 1) & (m2_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 0)] = 1
-        m_temp[(m1_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 0) & (m2_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] == 1)] = 2
-        m_maj.loc[:, set(m2.columns).intersection(set(m1.columns))] = m_temp
+        m_temp[(m1_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 1) & (m2_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 1)] = 3
+        m_temp[(m1_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 1) & (m2_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 0)] = 1
+        m_temp[(m1_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 0) & (m2_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] == 1)] = 2
+        m_maj.loc[:, list(set(m2.columns).intersection(set(m1.columns)))] = m_temp
 
     outfile = os.path.join(out_dir, 'predictions_single-votes_combined.txt')
     m.to_csv(outfile, sep = "\t")

@@ -7,6 +7,7 @@ import sys
 import logging
 ## 3rd party
 import pandas as ps
+import numpy as np
 ## application
 from traitar.PhenotypeCollection import PhenotypeCollection
 
@@ -16,7 +17,7 @@ def gene2hmm(domtblout_list, pt_models, gene2hmm_out = None, is_gene2hmm = False
     filtered and aggregated hmmer output files """
     #read accession file 
     accs = pt_models.get_pf2desc()
-    sum_df = ps.DataFrame(ps.np.zeros((len(domtblout_list), accs.shape[0])))
+    sum_df = ps.DataFrame(np.zeros((len(domtblout_list), accs.shape[0])))
     #set index to the actual files by getting rid of the preceding path
     sum_df.index = [i.split("/")[-1].replace("_filtered_best.dat", "") for i in domtblout_list]
     sum_df.columns = accs.index 
